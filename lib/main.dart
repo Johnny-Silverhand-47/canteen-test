@@ -40,8 +40,8 @@ class _AppInitState extends State<AppInit> {
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
+    return const AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
       // child: curretnScreen(data.state),
       child: LoginScreen(),
     );

@@ -1,4 +1,4 @@
 class AppImages {
-  static const loginTop = 'assets/svg/login_top.svg';
-  static const loginBottom = 'assets/svg/login_bottom.svg';
+  static const loginTop = 'assets/png/login_top.png';
+  static const loginBottom = 'assets/png/login_bottom.png';
 }
