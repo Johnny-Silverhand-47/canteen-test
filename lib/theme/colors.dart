@@ -9,4 +9,6 @@ class AppColors {
   static const tick=Color(0XFFEEA734);
 
   static const white = Colors.white;
+  static const black=Colors.black;
+  static const red=Colors.red;
 }

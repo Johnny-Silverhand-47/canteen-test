@@ -1,6 +1,9 @@
+import 'package:canteen_test/networking/controllers/auth_controller.dart';
+import 'package:canteen_test/screens/home/home_screen.dart';
 import 'package:canteen_test/screens/login/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 import 'config/routes.dart';
 import 'theme/colors.dart';
@@ -15,7 +18,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'E Canteen',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
@@ -23,7 +26,8 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.white,
         useMaterial3: true,
       ),
-      onGenerateRoute: generateRoute,
+      home: const AppInit(),
+      getPages: getPages,
     );
   }
 }
@@ -36,27 +40,28 @@ class AppInit extends StatefulWidget {
 }
 
 class _AppInitState extends State<AppInit> {
+  final AuthController _authController = Get.put(AuthController());
+  Future<void> initAuthSettings() async {
+    await _authController.checkAuthentication();
+  }
+
+  @override
+  void initState() {
+    initAuthSettings();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-    return const AnimatedSwitcher(
-      duration: Duration(milliseconds: 300),
-      // child: curretnScreen(data.state),
-      child: LoginScreen(),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: Obx(
+        () => _authController.isLogged.value
+            ? const HomeScreen()
+            : const LoginScreen(),
+      ),
     );
   }
-
-  // Widget curretnScreen(AuthState state) {
-  //   switch (state) {
-  //     case AuthState.initialize:
-  //       return const SplashScreen();
-  //     case AuthState.authenticated:
-  //       return const HomeScreen();
-  //     case AuthState.unauthenticated:
-  //       return const OnboardScreen();
-  //     default:
-  //       return const OnboardScreen();
-  //   }
-  // }
 }

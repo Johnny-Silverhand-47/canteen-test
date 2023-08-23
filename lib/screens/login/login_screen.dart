@@ -1,13 +1,14 @@
-import 'package:canteen_test/config/routes.dart';
+import 'package:canteen_test/networking/controllers/login_controller.dart';
 import 'package:canteen_test/theme/images.dart';
 import 'package:canteen_test/utils/build_context.dart';
 import 'package:canteen_test/utils/validators.dart';
 import 'package:canteen_test/widgets/custom_button.dart';
 import 'package:canteen_test/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:form_field_validator/form_field_validator.dart';
+import 'package:get/get.dart';
 
 import '../../theme/colors.dart';
+import '../../utils/constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -20,12 +21,27 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   double _screenHeight = 0.0;
 
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _hidePassword = true;
 
-  void _login() {
-    Navigator.pushNamed(context, AppRoutes.home);
+   LoginController? _loginController;
+
+  void _login() async {
+    if (_formKey.currentState!.validate()) {
+      final data = <String, dynamic>{
+        'username': _phoneController.text,
+        'password': _passwordController.text,
+        'store_id': '10',
+      };
+      await _loginController!.login(data);
+    }
+  }
+
+  @override
+  void initState(){
+    _loginController = Get.put(LoginController(context: context));
+    super.initState();
   }
 
   @override
@@ -33,12 +49,14 @@ class _LoginScreenState extends State<LoginScreen> {
     _screenHeight = MediaQuery.of(context).size.height -
         MediaQuery.of(context).viewPadding.top;
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            _backGround(),
-            _foreGround(),
-          ],
+      body: Obx(
+        () => SafeArea(
+          child: Stack(
+            children: [
+              _backGround(),
+              _foreGround(_loginController!.status.value),
+            ],
+          ),
         ),
       ),
     );
@@ -65,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _foreGround() {
+  Widget _foreGround(Status status) {
     final textStyle = Theme.of(context).textTheme;
     return SizedBox(
       height: _screenHeight,
@@ -88,24 +106,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: _screenHeight * (0.11)),
                 CustomTextfield(
-                  controller: _emailController,
-                  labelText: 'Email Address',
+                  controller: _phoneController,
+                  labelText: 'Mobile number',
+                  maxLines: 1,
+                  keyboardType: TextInputType.phone,
                   suffix: Icon(
                     Icons.done_rounded,
-                    color: _emailController.text.isNotEmpty
+                    color: _phoneController.text.isNotEmpty
                         ? AppColors.tick
                         : AppColors.label,
                   ),
-                  validator: MultiValidator([
-                    requiredValidator(),
-                    emailValidator,
-                  ]),
+                  validator: requiredValidator(),
                 ),
                 const SizedBox(height: 20),
                 CustomTextfield(
                   controller: _passwordController,
                   labelText: 'Password',
                   validator: requiredValidator(),
+                  maxLines: 1,
                   obscureText: _hidePassword,
                   suffix: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -132,7 +150,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 43),
-                CustomButton.primary(text: 'Login', width: 185, onTap: _login)
+                CustomButton.primary(
+                  text: 'Login',
+                  width: 185,
+                  isloading: status==Status.loading,
+                  onTap: _login,
+                ),
               ],
             ),
           ),
